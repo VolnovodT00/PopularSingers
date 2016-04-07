@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">PopularSingers</string>
+    <string name="albums_nominative">альбом</string>
+    <string name="albums_genitive">альбома</string>
+    <string name="albums_plural">альбомов</string>
+    <string name="tracks_nominative">песня</string>
+    <string name="tracks_genitive">песни</string>
+    <string name="tracks_plural">песен</string>
+</resources>
