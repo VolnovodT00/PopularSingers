@@ -153,11 +153,7 @@ public class DownloadSingers extends AsyncTask<String, Integer, Integer>
         // отправляем, что закончили
         m_listener.onEnd();
 
-        if ( result == ERROR_NO_ERROR )
-        { // все завершилось успешно
-            m_listener.onSuccess();
-        }
-        else
+        if ( result != ERROR_NO_ERROR )
         { // выводим ошибку
             m_listener.onFailure(result);
         }

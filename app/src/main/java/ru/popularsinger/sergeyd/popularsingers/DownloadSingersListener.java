@@ -9,8 +9,6 @@ public interface DownloadSingersListener
     void onBegin();
     // процесс скачивания
     void onProgress(Integer state, Integer value);
-    // получили результ
-    void onSuccess();
     // получили ошибку
     void onFailure(Integer code);
     // закончили

@@ -3,6 +3,7 @@ package ru.popularsinger.sergeyd.popularsingers;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -41,12 +42,16 @@ public class DetailActivity extends ActionBarActivity
                 getString(R.string.albums_plural));
         String links = intent.getStringExtra("links");
         String description = intent.getStringExtra("description");
+        if ( !description.isEmpty() )
+        { // здесь нужно сделать заглавной первую букву
+            description = description.substring(0, 1).toUpperCase() + description.substring(1);
+        }
 
         // загружаем картинку
         DisplayImageOptions options = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.empty_cover_small)
-                .showImageForEmptyUri(R.drawable.empty_cover_small)
-                .showImageOnFail(R.drawable.empty_cover_small)
+                .showImageOnLoading(R.drawable.empty_cover_big)
+                .showImageForEmptyUri(R.drawable.empty_cover_big)
+                .showImageOnFail(R.drawable.empty_cover_big)
                 .cacheInMemory(true)
                 .cacheOnDisk(true)
                 .considerExifParams(true)
@@ -57,6 +62,21 @@ public class DetailActivity extends ActionBarActivity
         lblDetGenres.setText(genres);
         lblDetAlbumsTracks.setText(albums + " " + albumsEnding + " * " + tracks + " " + tracksEnding);
         lblDetDescription.setText(description);
+
+        setTitle(name);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch ( item.getItemId() )
+        {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 }

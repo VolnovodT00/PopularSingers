@@ -1,9 +1,14 @@
 <resources>
-    <string name="app_name">PopularSingers</string>
+    <string name="app_name">Исполнители</string>
     <string name="albums_nominative">альбом</string>
     <string name="albums_genitive">альбома</string>
     <string name="albums_plural">альбомов</string>
     <string name="tracks_nominative">песня</string>
     <string name="tracks_genitive">песни</string>
     <string name="tracks_plural">песен</string>
+    <string name="download_progress">"Загрузка списка исполнителей"</string>
+    <string name="download_error_connect">"Ошибка подключения к серверу"</string>
+    <string name="download_error_parse">"Ошибка чтения списка исполнителей"</string>
+    <string name="download_error_title">"Ошибка программы"</string>
+    <string name="button_ok">"ОК"</string>
 </resources>
