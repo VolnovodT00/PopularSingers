@@ -24,6 +24,7 @@ public class DetailActivity extends ActionBarActivity
         TextView lblDetGenres = (TextView)findViewById(R.id.lblDetGenres);
         TextView lblDetAlbumsTracks = (TextView)findViewById(R.id.lblDetAlbumsTracks);
         TextView lblDetDescription = (TextView)findViewById(R.id.lblDetDescription);
+        TextView lblDetLink = (TextView)findViewById(R.id.lblDetLink);
 
         // вынимаем из Intent данные об исполнителе
         Intent intent = getIntent();
@@ -60,10 +61,13 @@ public class DetailActivity extends ActionBarActivity
         ImageLoader.getInstance().displayImage(url, imgBigCover, options);
         // заполняем остальные View
         lblDetGenres.setText(genres);
-        lblDetAlbumsTracks.setText(albums + " " + albumsEnding + " * " + tracks + " " + tracksEnding);
+        lblDetAlbumsTracks.setText(albums + " " + albumsEnding + "  \u2022  " + tracks + " " + tracksEnding);
         lblDetDescription.setText(description);
+        lblDetLink.setText(links);
 
+        // устанавливаем заголовок
         setTitle(name);
+        // добавляем кнопку назад
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
@@ -72,6 +76,7 @@ public class DetailActivity extends ActionBarActivity
     {
         switch ( item.getItemId() )
         {
+            // обработка кнопки назад
             case android.R.id.home:
                 finish();
                 return true;
