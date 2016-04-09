@@ -19,7 +19,6 @@ public class SingersAdapter extends BaseAdapter
 {
     private Cursor m_cursor;
     private Context m_context;
-    private LayoutInflater m_layoutInflater;
     private DisplayImageOptions m_options;
 
     public SingersAdapter(Context context, Cursor cursor)
@@ -41,12 +40,17 @@ public class SingersAdapter extends BaseAdapter
     @Override
     public int getCount()
     { // получаем количество записей
+        if ( m_cursor == null )
+            return 0;
         return m_cursor.getCount();
     }
 
     @Override
     public Object getItem(int i)
     { // получаем Item
+        if ( m_cursor == null )
+            return null;
+
         m_cursor.moveToPosition(i);
         return m_cursor;
     }
@@ -54,6 +58,9 @@ public class SingersAdapter extends BaseAdapter
     @Override
     public long getItemId(int i)
     { // получаем индекс Item'a
+        if ( m_cursor == null )
+            return 0;
+
         m_cursor.moveToPosition(i);
         return m_cursor.getLong(m_cursor.getColumnIndex(SingersDataBase.COLUMN_ID));
     }
@@ -84,6 +91,9 @@ public class SingersAdapter extends BaseAdapter
 
         // получаем курор на текущую строку
         Cursor cursor = (Cursor)getItem(i);
+        if ( cursor == null )
+            return view;
+
         // читаем нужные колонки
         String url = cursor.getString(cursor.getColumnIndex(SingersDataBase.COLUMN_COVER_SMALL));
         String name = cursor.getString(cursor.getColumnIndex(SingersDataBase.COLUMN_NAME));
@@ -110,6 +120,15 @@ public class SingersAdapter extends BaseAdapter
 
         return view;
     }
+
+    public void changeCursor(Cursor cursor)
+    {
+        // устанавливаем новый курсор
+        m_cursor = cursor;
+        // вызываем функцию перерисовки
+        notifyDataSetChanged();
+    }
+
     // holder для списка
     class ViewHolder
     {

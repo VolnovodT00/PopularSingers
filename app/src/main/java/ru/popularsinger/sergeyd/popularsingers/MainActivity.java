@@ -1,10 +1,16 @@
 package ru.popularsinger.sergeyd.popularsingers;
 
+
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -12,8 +18,11 @@ import android.widget.ListView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
-public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener
+public class MainActivity extends ActionBarActivity
+        implements AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<Cursor>
 {
+    private final String URL_ARTISTS_JSON = "http://download.cdn.yandex.net/mobilization-2016/artists.json";
+
     private SingersDataBase m_database;
     private DownloadSingers m_downloader;
     private SingersAdapter m_adapter;
@@ -31,11 +40,12 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         // создаем экземпляр класса базы данных и подключаемся к ней
         m_database = new SingersDataBase(this);
         m_database.open();
-
+        // создаем экземпляр класса скачивания списка исполнителей и назначаем слушателя
         m_downloader = new DownloadSingers(m_database, new DownloadSingersListener() {
 
             private ProgressDialog m_progress;
             @Override
+            // начало скачивания
             public void onBegin()
             {
                 // создаем окно диалога
@@ -51,6 +61,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             }
 
             @Override
+            // процесс скачивания
             public void onProgress(Integer state, Integer value)
             {
                 switch ( state )
@@ -71,6 +82,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             }
 
             @Override
+            // ошибка
             public void onFailure(Integer code)
             {
                 int message;
@@ -101,23 +113,25 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             }
 
             @Override
+            // окночание скачивания
             public void onEnd()
             {
                 // закрываем прогресс бар
                 m_progress.dismiss();
-
-                if ( !m_database.isEmpty() )
-                {
-                    // создаем адаптер
-                    m_adapter = new SingersAdapter(MainActivity.this, m_database.getAll());
-                    // назначаем его ListView
-                    ListView lstSingers = (ListView) findViewById(R.id.lstSingers);
-                    lstSingers.setAdapter(m_adapter);
-                    lstSingers.setOnItemClickListener(MainActivity.this);
-                }
+                // обновляем курсор
+                getSupportLoaderManager().getLoader(0).forceLoad();
             }
         });
-        m_downloader.execute("http://download.cdn.yandex.net/mobilization-2016/artists.json");
+        m_downloader.execute(URL_ARTISTS_JSON);
+
+        // создаем адаптер
+        m_adapter = new SingersAdapter(MainActivity.this, null);
+        // назначаем его ListView
+        ListView lstSingers = (ListView) findViewById(R.id.lstSingers);
+        lstSingers.setAdapter(m_adapter);
+        lstSingers.setOnItemClickListener(MainActivity.this);
+        // создаем Loader для базы данных
+        getSupportLoaderManager().initLoader(0, null, this);
     }
 
     protected void onDestroy()
@@ -128,9 +142,12 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
     @Override
+    // выбор элемента
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
+        // создаем Intent
         Intent intent = new Intent(this, DetailActivity.class);
+        // загружаем данные об исполнителе
         intent.putExtra("coverBig", m_database.getCoverBig(l));
         intent.putExtra("name", m_database.getName(l));
         intent.putExtra("genres", m_database.getGenres(l));
@@ -138,7 +155,48 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         intent.putExtra("albums", m_database.getAlbums(l));
         intent.putExtra("links", m_database.getLink(l));
         intent.putExtra("description", m_database.getDescription(l));
-
+        // запускаем новое Activity
         startActivity(intent);
+    }
+
+    @Override
+    // создание Loader'a для курсора
+    public Loader<Cursor> onCreateLoader(int id, Bundle args)
+    {
+        // создаем наш класс загрузки курсора
+        return new SingersCursorLoader(this, m_database);
+    }
+
+    @Override
+    // курсор загрузился
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data)
+    {
+        // меняем его на новый в адаптере
+        m_adapter.changeCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader)
+    {
+
+    }
+
+    // класс загрузки курсора
+    static class SingersCursorLoader extends CursorLoader
+    {
+        SingersDataBase m_database;
+
+        public SingersCursorLoader(Context context, SingersDataBase database)
+        {
+            super(context);
+            m_database = database;
+        }
+
+        @Override
+        public Cursor loadInBackground()
+        {
+            // получаем курсор
+            return m_database.getAll();
+        }
     }
 }
