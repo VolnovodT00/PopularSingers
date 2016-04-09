@@ -95,7 +95,6 @@ public class DownloadSingers extends AsyncTask<String, Integer, Integer>
                     genres += jsonGenres.optString(j) + ", ";
                 }
                 genres += jsonGenres.optString(jsonGenres.length()-1);
-
                 // получаем число треков
                 int tracks = jsonSinger.optInt("tracks");
                 // получаем число альбомов

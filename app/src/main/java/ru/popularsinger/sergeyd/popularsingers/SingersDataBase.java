@@ -81,18 +81,6 @@ public class SingersDataBase
             m_helper.close();
     }
 
-    public boolean isEmpty()
-    {
-        Cursor cursor = getAll();
-        return (cursor.getCount() == 0);
-    }
-
-    // удаляем все записи
-    public int clearAll()
-    {
-        return m_database.delete(DB_TABLE, null, null);
-    }
-
     // проверить, есть ли запись с таким UID
     public boolean checkRecord(int uid)
     {
@@ -120,17 +108,10 @@ public class SingersDataBase
         return m_database.insert(DB_TABLE, null, values);
     }
 
-    // удаляем запись
-    public int delete(long id)
-    {
-        return m_database.delete(DB_TABLE, COLUMN_ID + " = " + id, null);
-    }
-
     // получаем все данные из таблицы
     public Cursor getAll()
     {
-        Cursor cursor = m_database.query(DB_TABLE, null, null, null, null, null, null);
-        return cursor;
+        return m_database.query(DB_TABLE, null, null, null, null, null, null);
     }
 
     private Cursor get(long id, String column)

@@ -11,6 +11,8 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -19,10 +21,11 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 public class MainActivity extends ActionBarActivity
-        implements AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<Cursor>
+        implements DownloadSingersListener, LoaderManager.LoaderCallbacks<Cursor>
 {
     private final String URL_ARTISTS_JSON = "http://download.cdn.yandex.net/mobilization-2016/artists.json";
 
+    private ProgressDialog m_progressDialog;
     private SingersDataBase m_database;
     private DownloadSingers m_downloader;
     private SingersAdapter m_adapter;
@@ -41,95 +44,38 @@ public class MainActivity extends ActionBarActivity
         m_database = new SingersDataBase(this);
         m_database.open();
         // создаем экземпляр класса скачивания списка исполнителей и назначаем слушателя
-        m_downloader = new DownloadSingers(m_database, new DownloadSingersListener() {
-
-            private ProgressDialog m_progress;
-            @Override
-            // начало скачивания
-            public void onBegin()
-            {
-                // создаем окно диалога
-                m_progress = new ProgressDialog(MainActivity.this);
-                // заголовок
-                m_progress.setTitle(R.string.download_progress);
-                // горизонтальная полоса загрузки
-                m_progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                // режим Busy
-                m_progress.setIndeterminate(true);
-                // показываем
-                m_progress.show();
-            }
-
-            @Override
-            // процесс скачивания
-            public void onProgress(Integer state, Integer value)
-            {
-                switch ( state )
-                {
-                    case DownloadSingers.STATUS_JSON_LOAD:
-                        // устанавливаем число исполнителей
-                        m_progress.setMax(value);
-                        // обнуляем прогресс
-                        m_progress.setProgress(0);
-                        // отключаем режим Busy
-                        m_progress.setIndeterminate(false);
-                        break;
-                    case DownloadSingers.STATUS_JSON_PARSE_ITEM:
-                        // двигаем прогресс
-                        m_progress.setProgress(value);
-                        break;
-                }
-            }
-
-            @Override
-            // ошибка
-            public void onFailure(Integer code)
-            {
-                int message;
-                switch ( code )
-                {
-                    case DownloadSingers.ERROR_URL:
-                    case DownloadSingers.ERROR_CONNECTION:
-                    case DownloadSingers.ERROR_UNKNOWN:
-                        message = R.string.download_error_connect;
-                        break;
-                    default:
-                        message = R.string.download_error_parse;
-                        break;
-                }
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                // заголовок
-                builder.setTitle(R.string.download_error_title);
-                // сообщение
-                builder.setMessage(message);
-                // иконка
-                builder.setIcon(android.R.drawable.ic_dialog_alert);
-                // кнопка
-                builder.setPositiveButton(R.string.button_ok, null);
-                // создаем диалог
-                AlertDialog alert = builder.create();
-                alert.show();
-            }
-
-            @Override
-            // окночание скачивания
-            public void onEnd()
-            {
-                // закрываем прогресс бар
-                m_progress.dismiss();
-                // обновляем курсор
-                getSupportLoaderManager().getLoader(0).forceLoad();
-            }
-        });
+        m_downloader = new DownloadSingers(m_database, this);
         m_downloader.execute(URL_ARTISTS_JSON);
 
         // создаем адаптер
         m_adapter = new SingersAdapter(MainActivity.this, null);
-        // назначаем его ListView
+        // находим список
         ListView lstSingers = (ListView) findViewById(R.id.lstSingers);
+        // назначаем адаптер списку
         lstSingers.setAdapter(m_adapter);
-        lstSingers.setOnItemClickListener(MainActivity.this);
+        // добавляем View пустого списка
+        lstSingers.setEmptyView(findViewById(R.id.lblEmptyList));
+        // добавляем слушателя
+        lstSingers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            // выбор элемента
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
+            {
+                // создаем Intent
+                Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+                // загружаем данные об исполнителе
+                intent.putExtra("coverBig", m_database.getCoverBig(l));
+                intent.putExtra("name", m_database.getName(l));
+                intent.putExtra("genres", m_database.getGenres(l));
+                intent.putExtra("tracks", m_database.getTracks(l));
+                intent.putExtra("albums", m_database.getAlbums(l));
+                intent.putExtra("links", m_database.getLink(l));
+                intent.putExtra("description", m_database.getDescription(l));
+                // запускаем новое Activity
+                startActivity(intent);
+            }
+        });
         // создаем Loader для базы данных
         getSupportLoaderManager().initLoader(0, null, this);
     }
@@ -142,21 +88,19 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
-    // выбор элемента
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
+    public boolean onCreateOptionsMenu(Menu menu)
     {
-        // создаем Intent
-        Intent intent = new Intent(this, DetailActivity.class);
-        // загружаем данные об исполнителе
-        intent.putExtra("coverBig", m_database.getCoverBig(l));
-        intent.putExtra("name", m_database.getName(l));
-        intent.putExtra("genres", m_database.getGenres(l));
-        intent.putExtra("tracks", m_database.getTracks(l));
-        intent.putExtra("albums", m_database.getAlbums(l));
-        intent.putExtra("links", m_database.getLink(l));
-        intent.putExtra("description", m_database.getDescription(l));
-        // запускаем новое Activity
-        startActivity(intent);
+        menu.add("Обновиь список исполнителей");
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        // заново запускаем скачивание
+        m_downloader = new DownloadSingers(m_database, this);
+        m_downloader.execute(URL_ARTISTS_JSON);
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -179,6 +123,82 @@ public class MainActivity extends ActionBarActivity
     public void onLoaderReset(Loader<Cursor> loader)
     {
 
+    }
+
+    @Override
+    // начало загрузки
+    public void onBegin()
+    {
+        // создаем окно диалога
+        m_progressDialog = new ProgressDialog(this);
+        // заголовок
+        m_progressDialog.setTitle(R.string.download_progress);
+        // горизонтальная полоса загрузки
+        m_progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        // режим Busy
+        m_progressDialog.setIndeterminate(true);
+        // показываем
+        m_progressDialog.show();
+    }
+
+    @Override
+    // процесс загрузки
+    public void onProgress(Integer state, Integer value)
+    {
+        switch ( state )
+        {
+            case DownloadSingers.STATUS_JSON_LOAD:
+                // устанавливаем число исполнителей
+                m_progressDialog.setMax(value);
+                // обнуляем прогресс
+                m_progressDialog.setProgress(0);
+                // отключаем режим Busy
+                m_progressDialog.setIndeterminate(false);
+                break;
+            case DownloadSingers.STATUS_JSON_PARSE_ITEM:
+                // двигаем прогресс
+                m_progressDialog.setProgress(value);
+                break;
+        }
+    }
+
+    @Override
+    // ошибка при загрузке
+    public void onFailure(Integer code)
+    {
+        int message;
+        switch ( code )
+        {
+            case DownloadSingers.ERROR_URL:
+            case DownloadSingers.ERROR_CONNECTION:
+            case DownloadSingers.ERROR_UNKNOWN:
+                message = R.string.download_error_connect;
+                break;
+            default:
+                message = R.string.download_error_parse;
+                break;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        // сообщение
+        builder.setTitle(message);
+        // иконка
+        builder.setIcon(android.R.drawable.ic_dialog_alert);
+        // кнопка
+        builder.setPositiveButton(R.string.button_ok, null);
+        // создаем диалог
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    @Override
+    // окночание загрузки
+    public void onEnd()
+    {
+        // закрываем прогресс бар
+        m_progressDialog.dismiss();
+        // обновляем курсор
+        getSupportLoaderManager().getLoader(0).forceLoad();
     }
 
     // класс загрузки курсора

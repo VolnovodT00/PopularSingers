@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Исполнители</string>
+
     <string name="test_text">Test Text</string>
+
     <string name="albums_nominative">альбом</string>
     <string name="albums_genitive">альбома</string>
     <string name="albums_plural">альбомов</string>
@@ -10,7 +12,8 @@
     <string name="download_progress">"Загрузка списка исполнителей"</string>
     <string name="download_error_connect">"Ошибка подключения к серверу"</string>
     <string name="download_error_parse">"Ошибка чтения списка исполнителей"</string>
-    <string name="download_error_title">"Ошибка программы"</string>
     <string name="button_ok">"ОК"</string>
     <string name="detail_biography">Биография</string>
+
+    <string name="empty_list">Нет записей</string>
 </resources>
