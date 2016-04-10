@@ -111,7 +111,7 @@ public class SingersDataBase
     // получаем все данные из таблицы
     public Cursor getAll()
     {
-        return m_database.query(DB_TABLE, null, null, null, null, null, null);
+        return m_database.query(DB_TABLE, null, null, null, null, null, COLUMN_NAME);
     }
 
     private Cursor get(long id, String column)
