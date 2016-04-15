@@ -42,7 +42,7 @@ public class MainActivity extends ActionBarActivity
         // прописываем настройки по умолчанию для ImageLoader-а
         ImageLoaderConfiguration config = ImageLoaderConfiguration.createDefault(this);
         ImageLoader.getInstance().init(config);
-
+/*
         // создаем экземпляр класса базы данных и подключаемся к ней
         m_database = new SingersDatabase(this);
 
@@ -83,6 +83,7 @@ public class MainActivity extends ActionBarActivity
         });
         // создаем Loader для базы данных
         getSupportLoaderManager().initLoader(0, null, this);
+*/
     }
 
     protected void onDestroy()

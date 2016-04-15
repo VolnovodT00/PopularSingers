@@ -11,20 +11,10 @@
     android:orientation="vertical"
     tools:context="ru.popularsinger.sergeyd.popularsingers.MainActivity">
 
-    <ListView
+    <fragment
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/lstSingers"
-        >
-    </ListView>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/lblEmptyList"
-        android:text="@string/empty_list"
-        android:visibility="gone"
-        android:textSize="28sp"
-        android:gravity="center_horizontal"
+        android:name="ru.popularsinger.sergeyd.popularsingers.MainListFragment"
         />
+
 </LinearLayout>
