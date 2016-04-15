@@ -62,7 +62,7 @@ public class SingersAdapter extends BaseAdapter
             return 0;
 
         m_cursor.moveToPosition(i);
-        return m_cursor.getLong(m_cursor.getColumnIndex(SingersDataBase.COLUMN_ID));
+        return m_cursor.getLong(m_cursor.getColumnIndex(SingersDatabase.QUERY_COL_ID));
     }
 
     @Override
@@ -94,23 +94,23 @@ public class SingersAdapter extends BaseAdapter
         if ( cursor == null )
             return view;
 
-        // читаем нужные колонки
-        String url = cursor.getString(cursor.getColumnIndex(SingersDataBase.COLUMN_COVER_SMALL));
-        String name = cursor.getString(cursor.getColumnIndex(SingersDataBase.COLUMN_NAME));
-        String genres = cursor.getString(cursor.getColumnIndex(SingersDataBase.COLUMN_GENRES));
-        int albums = cursor.getInt(cursor.getColumnIndex(SingersDataBase.COLUMN_ALBUMS));
-        String albumsEnding = RightEndingString.getString(albums,
-                m_context.getString(R.string.albums_nominative),
-                m_context.getString(R.string.albums_genitive),
-                m_context.getString(R.string.albums_plural));
-        int tracks = cursor.getInt(cursor.getColumnIndex(SingersDataBase.COLUMN_TRACKS));
+        // имя исполнителя
+        String name = cursor.getString(cursor.getColumnIndex(SingersDatabase.QUERY_COL_NAME));
+        String genres = cursor.getString(cursor.getColumnIndex(SingersDatabase.QUERY_COL_GENRES));
+        int tracks = cursor.getInt(cursor.getColumnIndex(SingersDatabase.QUERY_COL_TRACKS));
         String tracksEnding = RightEndingString.getString(tracks,
                 m_context.getString(R.string.tracks_nominative),
                 m_context.getString(R.string.tracks_genitive),
                 m_context.getString(R.string.tracks_plural));
+        int albums = cursor.getInt(cursor.getColumnIndex(SingersDatabase.QUERY_COL_ALBUMS));
+        String albumsEnding = RightEndingString.getString(albums,
+                m_context.getString(R.string.albums_nominative),
+                m_context.getString(R.string.albums_genitive),
+                m_context.getString(R.string.albums_plural));
+        String coverSmall = cursor.getString(cursor.getColumnIndex(SingersDatabase.QUERY_COL_COVER_SMALL));
 
         // загружаем картинку
-        ImageLoader.getInstance().displayImage(url, holder.image, m_options);
+        ImageLoader.getInstance().displayImage(coverSmall, holder.image, m_options);
         // имя
         holder.name.setText(name);
         // жанры

@@ -1,7 +1,9 @@
 <resources>
-    <string name="app_name">Исполнители</string>
+    <string name="app_name">Популярные исполнители</string>
 
     <string name="test_text">Test Text</string>
+
+    <string name="main_activity_name">Исполнители</string>
 
     <string name="albums_nominative">альбом</string>
     <string name="albums_genitive">альбома</string>

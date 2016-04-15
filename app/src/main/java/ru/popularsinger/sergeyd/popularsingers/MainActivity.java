@@ -21,12 +21,12 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 public class MainActivity extends ActionBarActivity
-        implements DownloadSingersListener, LoaderManager.LoaderCallbacks<Cursor>
+        implements DownloadSingers.DownloadSingersListener, LoaderManager.LoaderCallbacks<Cursor>
 {
     private final String URL_ARTISTS_JSON = "http://download.cdn.yandex.net/mobilization-2016/artists.json";
 
     private ProgressDialog m_progressDialog;
-    private SingersDataBase m_database;
+    private SingersDatabase m_database;
     private DownloadSingers m_downloader;
     private SingersAdapter m_adapter;
 
@@ -36,13 +36,16 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // заголовок activiy
+        setTitle(R.string.main_activity_name);
+
         // прописываем настройки по умолчанию для ImageLoader-а
         ImageLoaderConfiguration config = ImageLoaderConfiguration.createDefault(this);
         ImageLoader.getInstance().init(config);
 
         // создаем экземпляр класса базы данных и подключаемся к ней
-        m_database = new SingersDataBase(this);
-        m_database.open();
+        m_database = new SingersDatabase(this);
+
         // создаем экземпляр класса скачивания списка исполнителей и назначаем слушателя
         m_downloader = new DownloadSingers(m_database, this);
         m_downloader.execute(URL_ARTISTS_JSON);
@@ -64,14 +67,16 @@ public class MainActivity extends ActionBarActivity
             {
                 // создаем Intent
                 Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+
+                Cursor cursor = m_database.getCursorBySinger(l);
                 // загружаем данные об исполнителе
-                intent.putExtra("coverBig", m_database.getCoverBig(l));
-                intent.putExtra("name", m_database.getName(l));
-                intent.putExtra("genres", m_database.getGenres(l));
-                intent.putExtra("tracks", m_database.getTracks(l));
-                intent.putExtra("albums", m_database.getAlbums(l));
-                intent.putExtra("links", m_database.getLink(l));
-                intent.putExtra("description", m_database.getDescription(l));
+                intent.putExtra("name", cursor.getString(cursor.getColumnIndex(SingersDatabase.QUERY_COL_NAME)));
+                intent.putExtra("genres", cursor.getString(cursor.getColumnIndex(SingersDatabase.QUERY_COL_GENRES)));
+                intent.putExtra("tracks", cursor.getInt(cursor.getColumnIndex(SingersDatabase.QUERY_COL_TRACKS)));
+                intent.putExtra("albums", cursor.getInt(cursor.getColumnIndex(SingersDatabase.QUERY_COL_ALBUMS)));
+                intent.putExtra("links", cursor.getString(cursor.getColumnIndex(SingersDatabase.QUERY_COL_LINK)));
+                intent.putExtra("description", cursor.getString(cursor.getColumnIndex(SingersDatabase.QUERY_COL_DESCRIPTION)));
+                intent.putExtra("coverBig", cursor.getString(cursor.getColumnIndex(SingersDatabase.QUERY_COL_COVER_BIG)));
                 // запускаем новое Activity
                 startActivity(intent);
             }
@@ -204,9 +209,9 @@ public class MainActivity extends ActionBarActivity
     // класс загрузки курсора
     static class SingersCursorLoader extends CursorLoader
     {
-        SingersDataBase m_database;
+        SingersDatabase m_database;
 
-        public SingersCursorLoader(Context context, SingersDataBase database)
+        public SingersCursorLoader(Context context, SingersDatabase database)
         {
             super(context);
             m_database = database;
@@ -216,7 +221,7 @@ public class MainActivity extends ActionBarActivity
         public Cursor loadInBackground()
         {
             // получаем курсор
-            return m_database.getAll();
+            return m_database.getCursorByView();
         }
     }
 }

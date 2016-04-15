@@ -9,11 +9,66 @@ import android.database.sqlite.SQLiteOpenHelper;
 /**
  * Created by sergeyd on 04/05/2016.
  */
-public class SingersDataBase
+public class SingersDatabase
 {
-    private static final String DB_NAME = "singers_database";
-    private static final int DB_VERSION = 1;
-    private static final String DB_TABLE = "singers";
+    private static final String BASE_NAME = "singers_database";
+    private static final int BASE_VERSION = 2;
+
+    public static final String QUERY_COL_ID = "id";
+    public static final String QUERY_COL_NAME = "name";
+    public static final String QUERY_COL_GENRES = "genres";
+    public static final String QUERY_COL_TRACKS = "tracks";
+    public static final String QUERY_COL_ALBUMS = "albums";
+    public static final String QUERY_COL_LINK = "link";
+    public static final String QUERY_COL_DESCRIPTION = "description";
+    public static final String QUERY_COL_COVER_SMALL = "cover_small";
+    public static final String QUERY_COL_COVER_BIG = "cover_big";
+
+    private static final String TABLE_SINGERS = "table_singers";
+    private static final String TABLE_SINGERS_COL_ID = "id";
+    private static final String TABLE_SINGERS_COL_NAME_ID = "name_id";
+    private static final String TABLE_SINGERS_COL_NAME = "name";
+    private static final String TABLE_SINGERS_COL_TRACKS = "tracks";
+    private static final String TABLE_SINGERS_COL_ALBUMS = "albums";
+    private static final String TABLE_SINGERS_COL_LINK = "link";
+    private static final String TABLE_SINGERS_COL_DESCRIPTION = "description";
+    private static final String TABLE_SINGERS_COL_COVER_SMALL = "cover_small";
+    private static final String TABLE_SINGERS_COL_COVER_BIG = "cover_big";
+
+    private static final String TABLE_SINGERS_CREATE =
+            "CREATE TABLE " + TABLE_SINGERS + "(" +
+                    TABLE_SINGERS_COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    TABLE_SINGERS_COL_NAME_ID + " INTEGER, " +
+                    TABLE_SINGERS_COL_NAME + " TEXT, " +
+                    TABLE_SINGERS_COL_TRACKS + " INTEGER, " +
+                    TABLE_SINGERS_COL_ALBUMS + " INTEGER, " +
+                    TABLE_SINGERS_COL_LINK + " TEXT, " +
+                    TABLE_SINGERS_COL_DESCRIPTION + " TEXT, " +
+                    TABLE_SINGERS_COL_COVER_SMALL + " TEXT, " +
+                    TABLE_SINGERS_COL_COVER_BIG + " TEXT" +
+                    ")";
+
+    private static final String TABLE_GENRES = "table_genres";
+    private static final String TABLE_GENRES_COL_ID = "id";
+    private static final String TABLE_GENRES_COL_GENRE = "genre";
+
+    private static final String TABLE_GENRES_CREATE =
+            "CREATE TABLE " + TABLE_GENRES + "(" +
+                    TABLE_GENRES_COL_ID + " INTEGER PRIMARY KEY, " +
+                    TABLE_GENRES_COL_GENRE + " TEXT UNIQUE" +
+                    ")";
+
+    private static final String TABLE_COMBINATIONS = "table_combination";
+    private static final String TABLE_COMBINATIONS_COL_ID = "id";
+    private static final String TABLE_COMBINATIONS_COL_NAME_ID = "name_id";
+    private static final String TABLE_COMBINATIONS_COL_GENRE_ID = "genre_id";
+
+    private static final String TABLE_COMBINATIONS_CREATE =
+            "CREATE TABLE " + TABLE_COMBINATIONS + "(" +
+                    TABLE_COMBINATIONS_COL_ID + " INTEGER PRIMARY KEY, " +
+                    TABLE_COMBINATIONS_COL_NAME_ID + " INTEGER, " +
+                    TABLE_COMBINATIONS_COL_GENRE_ID + " INTEGER" +
+                    ")";
 
     /*
     {
@@ -32,45 +87,12 @@ public class SingersDataBase
     },
     */
 
-    public static final String COLUMN_ID = "_id";
-    public static final String COLUMN_UID = "uid";
-    public static final String COLUMN_NAME = "name";
-    public static final String COLUMN_GENRES = "genres";
-    public static final String COLUMN_TRACKS = "tracks";
-    public static final String COLUMN_ALBUMS = "albums";
-    public static final String COLUMN_LINK = "link";
-    public static final String COLUMN_DESCRIPTION = "description";
-    public static final String COLUMN_COVER_SMALL = "cover_small";
-    public static final String COLUMN_COVER_BIG = "cover_big";
-
-    private static final String DB_CREATE =
-            "create table " + DB_TABLE + "(" +
-                    COLUMN_ID + " integer primary key autoincrement, " +
-                    COLUMN_UID + " integer, " +
-                    COLUMN_NAME + " text, " +
-                    COLUMN_GENRES + " text, " +
-                    COLUMN_TRACKS + " integer, " +
-                    COLUMN_ALBUMS + " integer, " +
-                    COLUMN_LINK + " text, " +
-                    COLUMN_DESCRIPTION + " text, " +
-                    COLUMN_COVER_SMALL + " text, " +
-                    COLUMN_COVER_BIG + " text" +
-                    ");";
-
-    private final Context m_context;
-
     private SingerDataBaseHelper m_helper;
     private SQLiteDatabase m_database;
 
-    public SingersDataBase(Context context)
+    public SingersDatabase(Context context)
     {
-        m_context = context;
-    }
-
-    // открываем подключение
-    public void open()
-    {
-        m_helper = new SingerDataBaseHelper(m_context, DB_NAME, null, DB_VERSION);
+        m_helper = new SingerDataBaseHelper(context, BASE_NAME, null, BASE_VERSION);
         m_database = m_helper.getWritableDatabase();
     }
 
@@ -82,99 +104,97 @@ public class SingersDataBase
     }
 
     // проверить, есть ли запись с таким UID
-    public boolean checkRecord(int uid)
+    public boolean checkRecord(int name_id)
     {
-        String from[] = { COLUMN_UID };
-        String where = COLUMN_UID + "=" + uid;
-        Cursor cursor = m_database.query(DB_TABLE, from, where, null, null, null, null, null);
+        Cursor cursor = m_database.query(TABLE_SINGERS, new String[]{TABLE_SINGERS_COL_NAME_ID}, TABLE_SINGERS_COL_NAME_ID + "=" + name_id, null, null, null, null, null);
         return (cursor.getCount() > 0);
     }
 
     // добавляем новую запись
-    public long add(int uid, String name, String genres, int tracks, int albums, String link,
+    public void add(int name_id, String name, String[] genres, int tracks, int albums, String link,
                     String description, String coverSmall, String coverBig)
     {
         ContentValues values = new ContentValues();
-        values.put(COLUMN_UID, uid);
-        values.put(COLUMN_NAME, name);
-        values.put(COLUMN_GENRES, genres);
-        values.put(COLUMN_TRACKS, tracks);
-        values.put(COLUMN_ALBUMS, albums);
-        values.put(COLUMN_LINK, link);
-        values.put(COLUMN_DESCRIPTION, description);
-        values.put(COLUMN_COVER_SMALL, coverSmall);
-        values.put(COLUMN_COVER_BIG, coverBig);
-        // добавляем в базу
-        return m_database.insert(DB_TABLE, null, values);
+
+        m_database.beginTransaction();
+        try
+        {
+            // заполняем основную табличку
+            values.put(TABLE_SINGERS_COL_NAME_ID, name_id);
+            values.put(TABLE_SINGERS_COL_NAME, name);
+            values.put(TABLE_SINGERS_COL_TRACKS, tracks);
+            values.put(TABLE_SINGERS_COL_ALBUMS, albums);
+            values.put(TABLE_SINGERS_COL_LINK, link);
+            values.put(TABLE_SINGERS_COL_DESCRIPTION, description);
+            values.put(TABLE_SINGERS_COL_COVER_SMALL, coverSmall);
+            values.put(TABLE_SINGERS_COL_COVER_BIG, coverBig);
+            m_database.insert(TABLE_SINGERS, null, values);
+
+            // добавляем новые записи в табличку жанров и табличку пересечений
+            for (String genre : genres)
+            {
+                genre = genre.trim();
+
+                values.clear();
+                values.put(TABLE_GENRES_COL_GENRE, genre);
+                // пишем в таблицу без повторов
+                long genre_id = m_database.insertWithOnConflict(TABLE_GENRES, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+                if ( genre_id == -1 )
+                {
+                    // получаем курсор на _id жанра
+                    Cursor cursor = m_database.query(TABLE_GENRES, new String[] { TABLE_GENRES_COL_ID }, TABLE_GENRES_COL_GENRE + "='"+genre+"'", null, null, null, null);
+                    cursor.moveToFirst();
+                    // получаем _id жанра
+                    genre_id = cursor.getInt(cursor.getColumnIndex(TABLE_GENRES_COL_ID));
+                    cursor.close();
+                }
+
+                values.clear();
+                values.put(TABLE_COMBINATIONS_COL_NAME_ID, name_id);
+                values.put(TABLE_COMBINATIONS_COL_GENRE_ID, genre_id);
+                m_database.insert(TABLE_COMBINATIONS, null, values);
+            }
+
+            m_database.setTransactionSuccessful();
+        }
+        finally
+        {
+            m_database.endTransaction();
+        }
     }
 
-    // получаем все данные из таблицы
-    public Cursor getAll()
+    public Cursor getCursorByView()
     {
-        return m_database.query(DB_TABLE, null, null, null, null, null, COLUMN_NAME);
+        String sql = "SELECT "+TABLE_SINGERS+"."+TABLE_SINGERS_COL_NAME_ID+" AS "+QUERY_COL_ID+", "+
+                TABLE_SINGERS_COL_NAME+" AS "+QUERY_COL_NAME+", "+
+                "GROUP_CONCAT("+TABLE_GENRES_COL_GENRE+", ', ') AS "+QUERY_COL_GENRES+", "+
+                TABLE_SINGERS_COL_TRACKS+" AS "+QUERY_COL_TRACKS+", "+
+                TABLE_SINGERS_COL_ALBUMS+" AS "+QUERY_COL_ALBUMS+", "+
+                TABLE_SINGERS_COL_COVER_SMALL+" AS "+QUERY_COL_COVER_SMALL+
+                " FROM "+TABLE_SINGERS+", "+TABLE_GENRES+", "+TABLE_COMBINATIONS+
+                " WHERE "+TABLE_SINGERS+"."+TABLE_SINGERS_COL_NAME_ID+"="+TABLE_COMBINATIONS+"."+TABLE_COMBINATIONS_COL_NAME_ID+
+                " AND "+TABLE_GENRES+"."+TABLE_GENRES_COL_ID+"="+TABLE_COMBINATIONS+"."+TABLE_COMBINATIONS_COL_GENRE_ID+
+                " GROUP BY "+TABLE_SINGERS_COL_NAME;
+        return m_database.rawQuery(sql, null);
     }
 
-    private Cursor get(long id, String column)
+    public Cursor getCursorBySinger(long name_id)
     {
-        String from[] = { column };
-        String where = COLUMN_ID + "=" + id;
-        Cursor cursor = m_database.query(DB_TABLE, from, where, null, null, null, null);
+        String sql = "SELECT "+TABLE_SINGERS_COL_NAME+" AS "+QUERY_COL_NAME+", "+
+                "GROUP_CONCAT("+TABLE_GENRES_COL_GENRE+", ', ') AS "+QUERY_COL_GENRES+", "+
+                TABLE_SINGERS_COL_TRACKS+" AS "+QUERY_COL_TRACKS+", "+
+                TABLE_SINGERS_COL_ALBUMS+" AS "+QUERY_COL_ALBUMS+", "+
+                TABLE_SINGERS_COL_LINK+" AS "+QUERY_COL_LINK+", "+
+                TABLE_SINGERS_COL_DESCRIPTION+" AS "+QUERY_COL_DESCRIPTION+", "+
+                TABLE_SINGERS_COL_COVER_BIG+" AS "+QUERY_COL_COVER_BIG+
+                " FROM "+TABLE_SINGERS+", "+TABLE_GENRES+", "+TABLE_COMBINATIONS+
+                " WHERE "+TABLE_SINGERS+"."+TABLE_SINGERS_COL_NAME_ID+"=?"+
+                " AND "+TABLE_SINGERS+"."+TABLE_SINGERS_COL_NAME_ID+"="+TABLE_COMBINATIONS+"."+TABLE_COMBINATIONS_COL_NAME_ID+
+                " AND "+TABLE_GENRES+"."+TABLE_GENRES_COL_ID+"="+TABLE_COMBINATIONS+"."+TABLE_COMBINATIONS_COL_GENRE_ID+
+                " GROUP BY "+TABLE_SINGERS_COL_NAME;
+        Cursor cursor = m_database.rawQuery(sql, new String[]{Long.toString(name_id)});
         cursor.moveToFirst();
         return cursor;
-    }
-
-    public int getUID(long id)
-    {
-        Cursor cursor = get(id, COLUMN_UID);
-        return cursor.getInt(cursor.getColumnIndex(COLUMN_UID));
-    }
-
-    public String getName(long id)
-    {
-        Cursor cursor = get(id, COLUMN_NAME);
-        return cursor.getString(cursor.getColumnIndex(COLUMN_NAME));
-    }
-
-    public String getGenres(long id)
-    {
-        Cursor cursor = get(id, COLUMN_GENRES);
-        return cursor.getString(cursor.getColumnIndex(COLUMN_GENRES));
-    }
-
-    public int getTracks(long id)
-    {
-        Cursor cursor = get(id, COLUMN_TRACKS);
-        return cursor.getInt(cursor.getColumnIndex(COLUMN_TRACKS));
-    }
-
-    public int getAlbums(long id)
-    {
-        Cursor cursor = get(id, COLUMN_ALBUMS);
-        return cursor.getInt(cursor.getColumnIndex(COLUMN_ALBUMS));
-    }
-
-    public String getLink(long id)
-    {
-        Cursor cursor = get(id, COLUMN_LINK);
-        return cursor.getString(cursor.getColumnIndex(COLUMN_LINK));
-    }
-
-    public String getDescription(long id)
-    {
-        Cursor cursor = get(id, COLUMN_DESCRIPTION);
-        return cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
-    }
-
-    public String getCoverSmall(long id)
-    {
-        Cursor cursor = get(id, COLUMN_COVER_SMALL);
-        return cursor.getString(cursor.getColumnIndex(COLUMN_COVER_SMALL));
-    }
-
-    public String getCoverBig(long id)
-    {
-        Cursor cursor = get(id, COLUMN_COVER_BIG);
-        return cursor.getString(cursor.getColumnIndex(COLUMN_COVER_BIG));
     }
 
     // класс по созданию и управлению базой данных
@@ -189,14 +209,95 @@ public class SingersDataBase
         @Override
         public void onCreate(SQLiteDatabase db)
         {
-            db.execSQL(DB_CREATE);
+            // создаем все необходимые таблички
+            db.execSQL(TABLE_SINGERS_CREATE);
+            db.execSQL(TABLE_GENRES_CREATE);
+            db.execSQL(TABLE_COMBINATIONS_CREATE);
         }
 
         // обновление базы данных
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
         {
-            // TODO: сдалать обновление
+            if ( oldVersion == 1 && newVersion == 2 )
+            {
+                ContentValues values = new ContentValues();
+                Cursor mainTableCursor;
+
+                db.beginTransaction();
+                try
+                {
+                    // создаем все необходимые таблички
+                    db.execSQL(TABLE_SINGERS_CREATE);
+                    db.execSQL(TABLE_GENRES_CREATE);
+                    db.execSQL(TABLE_COMBINATIONS_CREATE);
+
+                    // получаем курсор на старую основную таблицу
+                    mainTableCursor = db.query("singers", null, null, null, null, null, null);
+                    if ( mainTableCursor.moveToFirst() )
+                    {
+                        do
+                        {
+                            // получаем данные из старой таблицы
+                            int name_id = mainTableCursor.getInt(mainTableCursor.getColumnIndex("uid"));
+                            String name = mainTableCursor.getString(mainTableCursor.getColumnIndex("name"));
+                            String[] genres = mainTableCursor.getString(mainTableCursor.getColumnIndex("genres")).split(",");
+                            int tracks = mainTableCursor.getInt(mainTableCursor.getColumnIndex("tracks"));
+                            int albums = mainTableCursor.getInt(mainTableCursor.getColumnIndex("albums"));
+                            String link = mainTableCursor.getString(mainTableCursor.getColumnIndex("link"));
+                            String description = mainTableCursor.getString(mainTableCursor.getColumnIndex("description"));
+                            String coverSmall = mainTableCursor.getString(mainTableCursor.getColumnIndex("cover_small"));
+                            String coverBig = mainTableCursor.getString(mainTableCursor.getColumnIndex("cover_big"));
+
+                            // заполняем основную табличку
+                            values.clear();
+                            values.put(TABLE_SINGERS_COL_NAME_ID, name_id);
+                            values.put(TABLE_SINGERS_COL_NAME, name);
+                            values.put(TABLE_SINGERS_COL_TRACKS, tracks);
+                            values.put(TABLE_SINGERS_COL_ALBUMS, albums);
+                            values.put(TABLE_SINGERS_COL_LINK, link);
+                            values.put(TABLE_SINGERS_COL_DESCRIPTION, description);
+                            values.put(TABLE_SINGERS_COL_COVER_SMALL, coverSmall);
+                            values.put(TABLE_SINGERS_COL_COVER_BIG, coverBig);
+                            db.insert(TABLE_SINGERS, null, values);
+
+                            // добавляем новые записи в табличку жанров и табличку пересечений
+                            for (String genre : genres)
+                            {
+                                genre = genre.trim();
+
+                                values.clear();
+                                values.put(TABLE_GENRES_COL_GENRE, genre);
+                                // пишем в таблицу без повторов
+                                long genre_id = db.insertWithOnConflict(TABLE_GENRES, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+                                if ( genre_id == -1 )
+                                {
+                                    // получаем курсор на _id жанра
+                                    Cursor cursor = db.query(TABLE_GENRES, new String[] { TABLE_GENRES_COL_ID }, TABLE_GENRES_COL_GENRE + "='"+genre+"'", null, null, null, null);
+                                    cursor.moveToFirst();
+                                    // получаем _id жанра
+                                    genre_id = cursor.getInt(cursor.getColumnIndex(TABLE_GENRES_COL_ID));
+                                    cursor.close();
+                                }
+
+                                values.clear();
+                                values.put(TABLE_COMBINATIONS_COL_NAME_ID, name_id);
+                                values.put(TABLE_COMBINATIONS_COL_GENRE_ID, genre_id);
+                                db.insert(TABLE_COMBINATIONS, null, values);
+                            }
+                        }
+                        while (mainTableCursor.moveToNext());
+                    }
+
+                    // удаляем временную таблицу
+                    db.execSQL("DROP TABLE singers");
+                    db.setTransactionSuccessful();
+                }
+                finally
+                {
+                    db.endTransaction();
+                }
+            }
         }
     }
 }

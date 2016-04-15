@@ -28,10 +28,10 @@ public class DownloadSingers extends AsyncTask<String, Integer, Integer>
     public static final int ERROR_JSON = 3;
     public static final int ERROR_UNKNOWN = 4;
 
-    private SingersDataBase m_database;
+    private SingersDatabase m_database;
     private DownloadSingersListener m_listener;
 
-    public DownloadSingers(SingersDataBase database, DownloadSingersListener listener)
+    public DownloadSingers(SingersDatabase database, DownloadSingersListener listener)
     {
         m_database = database;
         m_listener = listener;
@@ -89,12 +89,19 @@ public class DownloadSingers extends AsyncTask<String, Integer, Integer>
                 String name = jsonSinger.optString("name");
                 // полчаем массив жанров
                 JSONArray jsonGenres = jsonSinger.optJSONArray("genres");
-                String genres = "";
-                for ( int j=0; j<jsonGenres.length()-1; j++ )
+
+                String[] genres;
+                if ( jsonGenres.length() != 0 )
                 {
-                    genres += jsonGenres.optString(j) + ", ";
+                    genres = new String[jsonGenres.length()];
+                    for (int j = 0; j < jsonGenres.length(); j++)
+                        genres[j] = jsonGenres.optString(j);
                 }
-                genres += jsonGenres.optString(jsonGenres.length()-1);
+                else
+                {
+                    // пустой жанр
+                    genres = new String[] {""};
+                }
                 // получаем число треков
                 int tracks = jsonSinger.optInt("tracks");
                 // получаем число альбомов
@@ -156,5 +163,17 @@ public class DownloadSingers extends AsyncTask<String, Integer, Integer>
         { // выводим ошибку
             m_listener.onFailure(result);
         }
+    }
+
+    public interface DownloadSingersListener
+    {
+        // начинаем скачивание
+        void onBegin();
+        // процесс скачивания
+        void onProgress(Integer state, Integer value);
+        // получили ошибку
+        void onFailure(Integer code);
+        // закончили
+        void onEnd();
     }
 }
