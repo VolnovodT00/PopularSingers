@@ -1,0 +1,88 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:context=".DetailsFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/imgBigCover"
+                android:src="@drawable/empty_cover_big"
+                android:adjustViewBounds="true"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_margin="15dp"
+                >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/lblDetGenres"
+                    android:text="@string/test_text"
+                    android:textSize="24sp"
+                    android:textColor="@android:color/darker_gray"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/lblDetAlbumsTracks"
+                    android:text="@string/test_text"
+                    android:textSize="24sp"
+                    android:layout_marginTop="10dp"
+                    android:textColor="@android:color/darker_gray"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/lblDetDescriptionTxt"
+                    android:text="@string/detail_biography"
+                    android:textSize="28sp"
+                    android:layout_marginTop="15dp"
+                    android:textColor="@android:color/black"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/lblDetDescription"
+                    android:text="@string/test_text"
+                    android:textSize="24sp"
+                    android:layout_marginTop="10dp"
+                    android:textColor="@android:color/black"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/lblDetLink"
+                    android:text="@string/test_text"
+                    android:textSize="24sp"
+                    android:autoLink="web"
+                    android:layout_marginTop="10dp"
+                    android:textColor="@android:color/black"
+                    />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</FrameLayout>

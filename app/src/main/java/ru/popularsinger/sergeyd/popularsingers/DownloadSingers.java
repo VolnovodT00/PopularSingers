@@ -1,5 +1,6 @@
 package ru.popularsinger.sergeyd.popularsingers;
 
+import android.content.Context;
 import android.os.AsyncTask;
 
 import org.json.JSONArray;
@@ -28,12 +29,12 @@ public class DownloadSingers extends AsyncTask<String, Integer, Integer>
     public static final int ERROR_JSON = 3;
     public static final int ERROR_UNKNOWN = 4;
 
-    private SingersDatabase m_database;
+    private DatabaseWriter m_writer;
     private DownloadSingersListener m_listener;
 
-    public DownloadSingers(SingersDatabase database, DownloadSingersListener listener)
+    public DownloadSingers(Context context, DownloadSingersListener listener)
     {
-        m_database = database;
+        m_writer = new DatabaseWriter(DatabaseHelper.getInstance(context));
         m_listener = listener;
     }
 
@@ -72,6 +73,7 @@ public class DownloadSingers extends AsyncTask<String, Integer, Integer>
             reader.close();
             // отключаемся
             connection.disconnect();
+
 
             // распарсиваем полученную строку
             JSONArray jsonSingers = new JSONArray(json.toString());
@@ -116,8 +118,8 @@ public class DownloadSingers extends AsyncTask<String, Integer, Integer>
                 String coverBig = jsonCover.optString("big");
 
                 // записываем данные в таблицу
-                if ( !m_database.checkRecord(id) )
-                    m_database.add(id, name, genres, tracks, albums, link, description, coverSmall, coverBig);
+                if ( !m_writer.checkRecord(id) )
+                    m_writer.add(id, name, genres, tracks, albums, link, description, coverSmall, coverBig);
 
                 // посылаем сообщение об числе загруженных исполнетелей
                 publishProgress(STATUS_JSON_PARSE_ITEM, i + 1);
