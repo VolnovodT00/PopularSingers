@@ -1,7 +1,8 @@
-package ru.popularsinger.sergeyd.popularsingers;
+package ru.popularsinger.sergeyd.popularsingers.Database;
 
 import android.content.Context;
-import android.os.AsyncTask;
+import android.support.v4.content.AsyncTaskLoader;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,18 +14,14 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import ru.popularsinger.sergeyd.popularsingers.Database.dbHelper;
-import ru.popularsinger.sergeyd.popularsingers.Database.dbWriter;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Created by sergeyd on 04/05/2016.
+ * Created by sergeyd on 04/19/2016.
  */
-
-public class DownloadSingers extends AsyncTask<String, Integer, Integer>
+public class dbTaskLoader extends AsyncTaskLoader<Integer>
 {
-    public static final int STATUS_JSON_LOAD = 0;
-    public static final int STATUS_JSON_PARSE_ITEM = 1;
+    private final String URL_ARTISTS_JSON = "http://download.cdn.yandex.net/mobilization-2016/artists.json";
 
     public static final int ERROR_NO_ERROR = 0;
     public static final int ERROR_URL = 1;
@@ -33,29 +30,23 @@ public class DownloadSingers extends AsyncTask<String, Integer, Integer>
     public static final int ERROR_UNKNOWN = 4;
 
     private dbWriter m_writer;
-    private DownloadSingersListener m_listener;
 
-    public DownloadSingers(Context context, DownloadSingersListener listener)
+    public dbTaskLoader(Context context)
     {
+        super(context);
         m_writer = new dbWriter(dbHelper.getInstance(context));
-        m_listener = listener;
     }
 
     @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-        // отпрвляем, что начали скачивать
-        m_listener.onBegin();
-    }
-
-    @Override
-    protected Integer doInBackground(String... urls)
+    public Integer loadInBackground()
     {
+        Log.d("popularsingers", hashCode() + " loadInBackground");
+
         // получаем данные с внещнего ресурса
         try
         {
             // задаем адрес
-            URL url = new URL(urls[0]);
+            URL url = new URL(URL_ARTISTS_JSON);
             // подключаемся для чтения
             HttpURLConnection connection = (HttpURLConnection)url.openConnection();
             connection.connect();
@@ -80,10 +71,6 @@ public class DownloadSingers extends AsyncTask<String, Integer, Integer>
 
             // распарсиваем полученную строку
             JSONArray jsonSingers = new JSONArray(json.toString());
-
-            // отправляем сообщение о том, что Json скачали и сейчас будем загружать исполнителей
-            publishProgress(STATUS_JSON_LOAD, jsonSingers.length());
-
             for ( int i=0; i<jsonSingers.length(); i++ )
             {
                 // получаем JSON объект (информация о певце)
@@ -123,9 +110,6 @@ public class DownloadSingers extends AsyncTask<String, Integer, Integer>
                 // записываем данные в таблицу
                 if ( !m_writer.checkRecord(id) )
                     m_writer.add(id, name, genres, tracks, albums, link, description, coverSmall, coverBig);
-
-                // посылаем сообщение об числе загруженных исполнетелей
-                publishProgress(STATUS_JSON_PARSE_ITEM, i + 1);
             }
         }
         catch ( MalformedURLException e ) // if spec could not be parsed as a URL.
@@ -133,12 +117,12 @@ public class DownloadSingers extends AsyncTask<String, Integer, Integer>
             return ERROR_URL;
         }
         catch ( IOException e ) // if an error occurs while opening the connection.
-                                // if this reader is closed or some other I/O error occurs.
+        // if this reader is closed or some other I/O error occurs.
         {
             return ERROR_CONNECTION;
         }
         catch ( JSONException e )   // if the parse fails or doesn't yield a JSONArray.
-                                    // if the value doesn't exist or is not a JSONObject.
+        // if the value doesn't exist or is not a JSONObject.
         {
             return ERROR_JSON;
         }
@@ -151,34 +135,11 @@ public class DownloadSingers extends AsyncTask<String, Integer, Integer>
     }
 
     @Override
-    protected void onProgressUpdate(Integer... values) {
-        super.onProgressUpdate(values);
-        m_listener.onProgress(values[0], values[1]);
-    }
-
-    @Override
-    protected void onPostExecute(Integer result)
+    protected void onStartLoading()
     {
-        super.onPostExecute(result);
+        super.onStartLoading();
+        Log.d("popularsingers", hashCode() + " onStartLoading");
 
-        // отправляем, что закончили
-        m_listener.onEnd();
-
-        if ( result != ERROR_NO_ERROR )
-        { // выводим ошибку
-            m_listener.onFailure(result);
-        }
-    }
-
-    public interface DownloadSingersListener
-    {
-        // начинаем скачивание
-        void onBegin();
-        // процесс скачивания
-        void onProgress(Integer state, Integer value);
-        // получили ошибку
-        void onFailure(Integer code);
-        // закончили
-        void onEnd();
+        this.forceLoad();
     }
 }

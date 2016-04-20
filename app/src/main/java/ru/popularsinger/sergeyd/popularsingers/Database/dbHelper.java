@@ -1,4 +1,4 @@
-package ru.popularsinger.sergeyd.popularsingers;
+package ru.popularsinger.sergeyd.popularsingers.Database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 /**
  * Created by Dell on 16.04.2016.
  */
-public class DatabaseHelper extends SQLiteOpenHelper
+public class dbHelper extends SQLiteOpenHelper
 {
     private static final String BASE_NAME = "singers_database";
     private static final int BASE_VERSION = 2;
@@ -68,17 +68,17 @@ public class DatabaseHelper extends SQLiteOpenHelper
                     TABLE_COMBINATIONS_COL_GENRE_ID + " INTEGER" +
                     ")";
 
-    private static DatabaseHelper m_instance = null;
+    private static dbHelper m_instance = null;
 
-    private DatabaseHelper(Context context)
+    private dbHelper(Context context)
     {
         super(context, BASE_NAME, null, BASE_VERSION);
     }
 
-    public static DatabaseHelper getInstance(Context context)
+    public static dbHelper getInstance(Context context)
     {
         if ( m_instance == null )
-            m_instance = new DatabaseHelper(context);
+            m_instance = new dbHelper(context);
         return m_instance;
     }
 

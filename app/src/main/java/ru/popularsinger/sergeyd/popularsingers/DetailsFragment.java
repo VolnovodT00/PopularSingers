@@ -13,6 +13,9 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import ru.popularsinger.sergeyd.popularsingers.Database.dbHelper;
+import ru.popularsinger.sergeyd.popularsingers.Database.dbReader;
+
 public class DetailsFragment extends Fragment
 {
     String m_name;
@@ -53,29 +56,29 @@ public class DetailsFragment extends Fragment
         long index = getIndex();
         if ( index != 0 )
         {
-            Cursor cursor = new DatabaseReader(DatabaseHelper.getInstance(getActivity())).getCursorBySinger(index);
+            Cursor cursor = new dbReader(dbHelper.getInstance(getActivity())).getCursorBySinger(index);
             // загружаем данные об исполнителе
-            getActivity().setTitle(cursor.getString(cursor.getColumnIndex(DatabaseHelper.QUERY_COL_NAME)));
+            getActivity().setTitle(cursor.getString(cursor.getColumnIndex(dbHelper.QUERY_COL_NAME)));
             Log.d("popularsingers", "frag: settitle");
-            String genres = cursor.getString(cursor.getColumnIndex(DatabaseHelper.QUERY_COL_GENRES));
-            int tracks = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.QUERY_COL_TRACKS));
+            String genres = cursor.getString(cursor.getColumnIndex(dbHelper.QUERY_COL_GENRES));
+            int tracks = cursor.getInt(cursor.getColumnIndex(dbHelper.QUERY_COL_TRACKS));
             String tracksEnding = RightEndingString.getString(tracks,
                     getString(R.string.tracks_nominative),
                     getString(R.string.tracks_genitive),
                     getString(R.string.tracks_plural));
-            int albums = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.QUERY_COL_ALBUMS));
+            int albums = cursor.getInt(cursor.getColumnIndex(dbHelper.QUERY_COL_ALBUMS));
             String albumsEnding = RightEndingString.getString(albums,
                     getString(R.string.albums_nominative),
                     getString(R.string.albums_genitive),
                     getString(R.string.albums_plural));
-            String links = cursor.getString(cursor.getColumnIndex(DatabaseHelper.QUERY_COL_LINK));
-            String description = cursor.getString(cursor.getColumnIndex(DatabaseHelper
+            String links = cursor.getString(cursor.getColumnIndex(dbHelper.QUERY_COL_LINK));
+            String description = cursor.getString(cursor.getColumnIndex(dbHelper
                     .QUERY_COL_DESCRIPTION));
             if (!description.isEmpty())
             { // здесь нужно сделать заглавной первую букву
                 description = description.substring(0, 1).toUpperCase() + description.substring(1);
             }
-            String coverBig = cursor.getString(cursor.getColumnIndex(DatabaseHelper
+            String coverBig = cursor.getString(cursor.getColumnIndex(dbHelper
                     .QUERY_COL_COVER_BIG));
 
             // загружаем картинку

@@ -1,22 +1,28 @@
 package ru.popularsinger.sergeyd.popularsingers;
 
 import android.app.Activity;
-import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-public class SingersFragment extends android.support.v4.app.ListFragment implements LoaderManager.LoaderCallbacks<Cursor>
+import ru.popularsinger.sergeyd.popularsingers.Database.dbAdapter;
+import ru.popularsinger.sergeyd.popularsingers.Database.dbCursorLoader;
+import ru.popularsinger.sergeyd.popularsingers.Database.dbTaskLoader;
+
+public class SingersFragment extends ListFragment implements LoaderManager.LoaderCallbacks
 {
+    private final int CURSOR_LOADER_IND = 0;
+    private final int DB_LOADER_IND = 1;
+
     private onItemClickListener m_listener;
-    private SingersAdapter m_adapter;
+    private dbAdapter m_adapter;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState)
@@ -24,11 +30,12 @@ public class SingersFragment extends android.support.v4.app.ListFragment impleme
         super.onActivityCreated(savedInstanceState);
 
         // создаем адаптер
-        m_adapter = new SingersAdapter(getActivity(), null);
+        m_adapter = new dbAdapter(getActivity(), null);
         // назначаем адаптер списку
         setListAdapter(m_adapter);
         // создаем Loader для базы данных
-        getActivity().getSupportLoaderManager().initLoader(0, null, this);
+        getActivity().getSupportLoaderManager().initLoader(DB_LOADER_IND, null, this);
+        getActivity().getSupportLoaderManager().initLoader(CURSOR_LOADER_IND, null, this);
     }
 
     @Override
@@ -52,49 +59,53 @@ public class SingersFragment extends android.support.v4.app.ListFragment impleme
     }
 
     @Override
-    // создание Loader'a для курсора
-    public Loader<Cursor> onCreateLoader(int id, Bundle args)
+    // создание Loader'a
+    public Loader onCreateLoader(int id, Bundle args)
     {
+        Loader loader = null;
+        switch ( id )
+        {
+            case CURSOR_LOADER_IND: // Loader загрузки курсора
+                Log.d("popularsingers", "onCreateLoader: dbCursorLoader");
+                loader = new dbCursorLoader(getActivity());
+                break;
+            case DB_LOADER_IND: // Loader загрузки BD
+                Log.d("popularsingers", "onCreateLoader: dbTaskLoader");
+                loader = new dbTaskLoader(getActivity());
+        }
+
         // создаем наш класс загрузки курсора
-        return new SingersCursorLoader(getActivity());
+        return loader;
     }
 
     @Override
-    // курсор загрузился
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data)
+    // окночание загрузки
+    public void onLoadFinished(Loader loader, Object data)
     {
-        // меняем его на новый в адаптере
-        m_adapter.changeCursor(data);
+        switch ( loader.getId() )
+        {
+            case CURSOR_LOADER_IND: // Loader загрузки курсора
+                Log.d("popularsingers", "onLoadFinished: dbCursorLoader");
+                // подменям курор в адапетер
+                m_adapter.changeCursor((Cursor) data);
+                break;
+            case DB_LOADER_IND: // Loader загрузки BD
+                Log.d("popularsingers", "onLoadFinished: dbTaskLoader " + data.toString());// обновляем курсор
+                getActivity().getSupportLoaderManager().getLoader(CURSOR_LOADER_IND).forceLoad();
+                break;
+        }
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader)
+    // уничтожение Loader'a
+    public void onLoaderReset(Loader loader)
     {
 
     }
 
-    // класс загрузки курсора
-    static class SingersCursorLoader extends CursorLoader
-    {
-        DatabaseReader m_reader;
-
-        public SingersCursorLoader(Context context)
-        {
-            super(context);
-            m_reader = new DatabaseReader(DatabaseHelper.getInstance(context));
-        }
-
-        @Override
-        public Cursor loadInBackground()
-        {
-            // получаем курсор
-            return m_reader.getCursorByView();
-        }
-    }
-
+    // интерфейс для Activity
     public interface onItemClickListener
     {
         void itemClick(long id);
     }
-
 }
