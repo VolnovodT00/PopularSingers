@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import ru.popularsinger.sergeyd.popularsingers.Common.RightEnding;
 import ru.popularsinger.sergeyd.popularsingers.Database.dbHelper;
 import ru.popularsinger.sergeyd.popularsingers.Database.dbReader;
 
@@ -59,15 +60,14 @@ public class DetailsFragment extends Fragment
             Cursor cursor = new dbReader(dbHelper.getInstance(getActivity())).getCursorBySinger(index);
             // загружаем данные об исполнителе
             getActivity().setTitle(cursor.getString(cursor.getColumnIndex(dbHelper.QUERY_COL_NAME)));
-            Log.d("popularsingers", "frag: settitle");
             String genres = cursor.getString(cursor.getColumnIndex(dbHelper.QUERY_COL_GENRES));
             int tracks = cursor.getInt(cursor.getColumnIndex(dbHelper.QUERY_COL_TRACKS));
-            String tracksEnding = RightEndingString.getString(tracks,
+            String tracksEnding = RightEnding.getString(tracks,
                     getString(R.string.tracks_nominative),
                     getString(R.string.tracks_genitive),
                     getString(R.string.tracks_plural));
             int albums = cursor.getInt(cursor.getColumnIndex(dbHelper.QUERY_COL_ALBUMS));
-            String albumsEnding = RightEndingString.getString(albums,
+            String albumsEnding = RightEnding.getString(albums,
                     getString(R.string.albums_nominative),
                     getString(R.string.albums_genitive),
                     getString(R.string.albums_plural));

@@ -12,10 +12,10 @@
     tools:context="ru.popularsinger.sergeyd.popularsingers.MainActivity">
 
     <fragment
-        android:id="@+id/singers_fragment"
+        android:id="@+id/main_list_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="ru.popularsinger.sergeyd.popularsingers.SingersFragment"
+        android:name="ru.popularsinger.sergeyd.popularsingers.ListItemsFragment"
         />
 
 </LinearLayout>

@@ -1,9 +1,9 @@
-package ru.popularsinger.sergeyd.popularsingers;
+package ru.popularsinger.sergeyd.popularsingers.Common;
 
 /**
  * Created by sergeyd on 04/05/2016.
  */
-public class RightEndingString
+public class RightEnding
 {
     public static String getString(int num, String nominative, String genitive, String plural)
     {

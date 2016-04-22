@@ -14,7 +14,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by sergeyd on 04/19/2016.
@@ -40,8 +39,6 @@ public class dbTaskLoader extends AsyncTaskLoader<Integer>
     @Override
     public Integer loadInBackground()
     {
-        Log.d("popularsingers", hashCode() + " loadInBackground");
-
         // получаем данные с внещнего ресурса
         try
         {
@@ -138,8 +135,8 @@ public class dbTaskLoader extends AsyncTaskLoader<Integer>
     protected void onStartLoading()
     {
         super.onStartLoading();
-        Log.d("popularsingers", hashCode() + " onStartLoading");
 
         this.forceLoad();
     }
+
 }

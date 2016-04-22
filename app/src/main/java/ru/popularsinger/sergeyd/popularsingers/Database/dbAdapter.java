@@ -12,9 +12,8 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
-import ru.popularsinger.sergeyd.popularsingers.Database.dbHelper;
 import ru.popularsinger.sergeyd.popularsingers.R;
-import ru.popularsinger.sergeyd.popularsingers.RightEndingString;
+import ru.popularsinger.sergeyd.popularsingers.Common.RightEnding;
 
 /**
  * Created by sergeyd on 04/07/2016.
@@ -102,12 +101,12 @@ public class dbAdapter extends BaseAdapter
         String name = cursor.getString(cursor.getColumnIndex(dbHelper.QUERY_COL_NAME));
         String genres = cursor.getString(cursor.getColumnIndex(dbHelper.QUERY_COL_GENRES));
         int tracks = cursor.getInt(cursor.getColumnIndex(dbHelper.QUERY_COL_TRACKS));
-        String tracksEnding = RightEndingString.getString(tracks,
+        String tracksEnding = RightEnding.getString(tracks,
                 m_context.getString(R.string.tracks_nominative),
                 m_context.getString(R.string.tracks_genitive),
                 m_context.getString(R.string.tracks_plural));
         int albums = cursor.getInt(cursor.getColumnIndex(dbHelper.QUERY_COL_ALBUMS));
-        String albumsEnding = RightEndingString.getString(albums,
+        String albumsEnding = RightEnding.getString(albums,
                 m_context.getString(R.string.albums_nominative),
                 m_context.getString(R.string.albums_genitive),
                 m_context.getString(R.string.albums_plural));
